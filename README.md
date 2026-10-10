@@ -4,6 +4,116 @@
 
 A local, integrated hackathon prototype for citizens and court teams. All seeded cases, parties, tasks, hearings and administrative training labels are fictional. NyayaAI is **not an official court/government service**, legal representative, filing gateway or automated judge.
 
+## Quick start: run NyayaAI on your computer
+
+The first install takes about 10–15 minutes and needs an internet connection. You do **not** need a database server, an API key or any paid service. The demo stores fictional data in a local SQLite file.
+
+### 1. Install the required tools (one time)
+
+| Tool | Version | Check it in a terminal | Download |
+|---|---|---|---|
+| Git | any recent version | `git --version` | https://git-scm.com/downloads |
+| Python | 3.11 or newer | Windows: `py --version` · macOS/Linux: `python3 --version` | https://www.python.org/downloads/ |
+| Node.js (includes npm) | 20.9 or newer (LTS recommended) | `node --version` | https://nodejs.org/ |
+
+On Windows, tick **"Add python.exe to PATH"** in the Python installer. After installing anything, close and reopen your terminal.
+
+### 2. Download the project
+
+```bash
+git clone https://github.com/Arnab-Majhi/NyayAI-Reforming-Indian-justice-system-through-AI.git
+cd NyayAI-Reforming-Indian-justice-system-through-AI
+```
+
+No Git? On the GitHub page, choose **Code → Download ZIP**, extract it, then open a terminal inside the extracted folder.
+
+### 3. Start the backend (Terminal 1)
+
+Run these from the project folder.
+
+**Windows (PowerShell):**
+
+```powershell
+cd backend
+py -m venv .venv
+Copy-Item .env.example .env
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m app.seed
+.\.venv\Scripts\python.exe -m app.demo_samples
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+**macOS / Linux:**
+
+```bash
+cd backend
+python3 -m venv .venv
+cp .env.example .env
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m app.seed
+.venv/bin/python -m app.demo_samples
+.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+The package install can take a few minutes. The backend is ready when you see `Uvicorn running on http://127.0.0.1:8000`. To confirm it works, open http://127.0.0.1:8000/api/health in your browser. **Keep this terminal open.**
+
+### 4. Start the frontend (Terminal 2)
+
+Open a **second** terminal in the project folder:
+
+**Windows (PowerShell):**
+
+```powershell
+cd frontend
+Copy-Item .env.example .env.local
+npm ci
+npm run dev
+```
+
+**macOS / Linux:**
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm ci
+npm run dev
+```
+
+The frontend is ready when you see `Ready` and `http://localhost:3000`.
+
+### 5. Open the app
+
+Go to **http://localhost:3000**. Use `localhost`, not `127.0.0.1`, for this address. Open a workspace and pick a fictional account, such as **Citizen 1** or **Registry Officer 1**. There are no passwords.
+
+### Running it again later
+
+You only install once. Next time, start the two servers:
+
+| | Windows (PowerShell) | macOS / Linux |
+|---|---|---|
+| Terminal 1 | `cd backend` then `.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000` | `cd backend` then `.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000` |
+| Terminal 2 | `cd frontend` then `npm run dev` | `cd frontend` then `npm run dev` |
+
+Press **Ctrl + C** in each terminal to stop the app.
+
+### Common setup problems
+
+| Problem | Fix |
+|---|---|
+| `py` is not recognized (Windows) | Use `python` instead of `py`, or reinstall Python with "Add python.exe to PATH" ticked. |
+| `python3` / `pip` errors on Linux | Install the venv package first, e.g. `sudo apt install python3-venv`. |
+| `npm` is not recognized | Install Node.js, then reopen the terminal. |
+| Port 3000 or 8000 is already in use | Stop the other program using that port (or a previous NyayaAI run), then start again. |
+| Page says the server is unavailable | Make sure Terminal 1 (backend) is still running and http://127.0.0.1:8000/api/health opens. |
+| Login or saving fails with an origin error | Open the app at http://localhost:3000 exactly. |
+| Uploading a scanned PDF/image says OCR unavailable | Optional: install Tesseract (see [Troubleshooting](#troubleshooting)). Text PDFs and DOCX files work without it. |
+
+### Optional extras
+
+- **Production mode:** in `frontend`, run `npm run build` once, then `npm run start` instead of `npm run dev`.
+- **One-command launcher (Windows only):** after installing everything and running `npm run build`, run `powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1` from the project folder. It seeds the demo data and starts both servers in production mode, writing logs to the project folder.
+- **Scanned documents (OCR), live AI answers or MongoDB:** see [Environment variables](#environment-variables), [Storage configuration](#storage-configuration) and [Troubleshooting](#troubleshooting).
+
 ## What works
 
 | Module | Interactive workflow |
@@ -58,42 +168,17 @@ flowchart LR
 - Tesseract executable only for scanned PDFs/images. Text PDFs and DOCX work without it.
 - Initial package installation needs network access. Thereafter the deterministic demo and curated corpus work offline.
 
-## Exact Windows setup (PowerShell)
+## Setup notes
 
-The commands below use this workspace's absolute path. Adjust `$Repo` if you clone elsewhere.
+For step-by-step commands, see [Quick start](#quick-start-run-nyayaai-on-your-computer). Useful addresses once both servers are running:
 
-```powershell
-$Repo = 'C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI'
-Set-Location "$Repo\backend"
-py -m venv .venv
-Copy-Item .env.example .env
-& .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-& .\.venv\Scripts\python.exe -m app.seed
-& .\.venv\Scripts\python.exe -m app.demo_samples
-& .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-```
+- App: **http://localhost:3000**
+- API health: **http://127.0.0.1:8000/api/health**
+- Interactive API docs (OpenAPI): **http://127.0.0.1:8000/docs**
 
-In a **second** PowerShell terminal:
+Activating the virtual environment is optional. The commands call its Python directly, which avoids PowerShell execution-policy problems. Run the API as a single worker, because this prototype's scheduling lock works within one process.
 
-```powershell
-$Repo = 'C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI'
-Set-Location "$Repo\frontend"
-Copy-Item .env.example .env.local
-npm ci
-npm run dev
-```
-
-Open **http://localhost:3000**. API health: **http://127.0.0.1:8000/api/health**. Interactive OpenAPI: **http://127.0.0.1:8000/docs**.
-
-Virtual environment activation is optional; the commands call its Python directly, avoiding PowerShell execution-policy problems. Keep the API on one worker for this prototype's scheduling lock. `npm run build` then `npm run start` runs the production frontend.
-
-After dependency installation and a successful frontend build, an optional launcher seeds the demo packages and starts both production-mode processes with local log files:
-
-```powershell
-& 'C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI\scripts\start-demo.ps1'
-```
-
-The launcher refuses occupied ports rather than killing existing services. Use the two-terminal commands above if your PowerShell execution policy blocks local scripts.
+The optional Windows launcher `scripts/start-demo.ps1` refuses to start if port 3000 or 8000 is already in use, rather than stopping existing services. If your execution policy blocks local scripts, use the two-terminal commands instead.
 
 ## Storage configuration
 
@@ -115,7 +200,7 @@ Collections: users, sessions, cases, documents, sources, filings, tasks, predict
 
 ## Environment variables
 
-Backend template: `C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI\backend\.env.example`
+Backend template: `backend/.env.example` (copy to `backend/.env`)
 
 | Variable | Default / purpose |
 |---|---|
@@ -131,7 +216,7 @@ Backend template: `C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-
 | `LLM_API_KEY` | Empty by default. Backend-only secret. |
 | `TESSERACT_CMD` | Optional absolute path to `tesseract.exe`. |
 
-Frontend template: `C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI\frontend\.env.example`
+Frontend template: `frontend/.env.example` (copy to `frontend/.env.local`)
 
 `BACKEND_URL=http://127.0.0.1:8000` is a **server-side** Next.js rewrite destination. No public API key or browser token variable is needed. Restart/rebuild Next.js after changing the rewrite destination.
 
@@ -147,11 +232,10 @@ Open a workspace and select Citizen 1/2/3, Registry Officer 1/2 or Administrator
 Seed automatically runs on initial successful startup, or manually:
 
 ```powershell
-$Repo = 'C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI'
-Set-Location "$Repo\backend"
-& .\.venv\Scripts\python.exe -m app.seed
+# Run from the backend folder (macOS/Linux: use .venv/bin/python)
+.\.venv\Scripts\python.exe -m app.seed
 # Destructive: stop servers first; clears records/sessions in selected demo database.
-& .\.venv\Scripts\python.exe -m app.seed --reset
+.\.venv\Scripts\python.exe -m app.seed --reset
 ```
 
 Reset rebuilds 36 cases with stable IDs and dates relative to the reset date. It invalidates sessions. Unreferenced upload files are not automatically deleted; delete the private uploads directory manually only after stopping the server if you want to reclaim space. Never point reset at a non-demo database.
@@ -211,10 +295,10 @@ Case filters: `q`, `status`, `category`, `stage`, `assigned_staff`, `filed_after
 ## Tests and build
 
 ```powershell
-$Repo = 'C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI'
-Set-Location "$Repo\backend"
-& .\.venv\Scripts\python.exe -m pytest -q
-Set-Location "$Repo\frontend"
+# From the project folder (macOS/Linux: use .venv/bin/python)
+cd backend
+.\.venv\Scripts\python.exe -m pytest -q
+cd ..\frontend
 npm run typecheck
 npm run build
 npx playwright install chromium
@@ -223,7 +307,7 @@ npm run test:e2e
 
 Playwright starts local servers (or reuses running ones) and uses the actual application with demo storage. Browser tests create sample tasks/documents/reports; reset afterward if desired. Backend tests use isolated temporary SQLite databases and mock provider/OCR failures; no paid service or live legal retrieval is required. An installed Edge can be used instead of downloading Chromium: `$env:PLAYWRIGHT_CHANNEL='msedge'; npm run test:e2e`.
 
-See `C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI\docs\validation.md` for checks actually executed, and `C:\Users\ARNAB\Desktop\coding club\cline ai\NyayAI-Reforming-Indian-justice-system-through-AI\docs\demo-script.md` for the 5–7 minute demonstration.
+See [`docs/validation.md`](docs/validation.md) for checks actually executed, and [`docs/demo-script.md`](docs/demo-script.md) for the 5–7 minute demonstration.
 
 ## Security, privacy and known limitations
 
