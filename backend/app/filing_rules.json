@@ -1,0 +1,10 @@
+{
+  "id": "demo-civil-intake-v1",
+  "title": "Synthetic civil dispute intake package",
+  "applicability": "Hackathon document-preparation exercise only; not a court filing requirement.",
+  "source_reference": null,
+  "required_document_types": ["statement", "supporting record"],
+  "required_fields": ["applicant_name", "respondent_name", "incident_date"],
+  "minimum_statement_characters": 80,
+  "official_requirements": "Court fee, limitation, jurisdiction, signatures, service and prescribed forms require official or professional verification."
+}

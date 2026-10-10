@@ -1,0 +1,1 @@
+"""NyayaAI local judicial assistance prototype."""
